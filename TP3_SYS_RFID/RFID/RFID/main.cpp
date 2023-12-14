@@ -1,7 +1,8 @@
 #include <QCoreApplication>
 #include <QSerialPort>
 #include <QSerialPortInfo>
-#include <QDebug>
+#include <QWebSocketServer>
+#include <QWebSocket>
 #include <QTimer>
 
 class ArduinoReader : public QObject
@@ -12,43 +13,101 @@ public:
 	ArduinoReader(QObject *parent = nullptr) : QObject(parent)
 	{
 		serial = new QSerialPort(this);
+		server = new QWebSocketServer("WebSocket Server", QWebSocketServer::NonSecureMode, this);
 
 		// Remplacez "COM3" par le port série de votre Arduino
 		serial->setPortName("COM3");
 		serial->setBaudRate(QSerialPort::Baud9600);
 
 		connect(serial, SIGNAL(readyRead()), this, SLOT(readData()));
-		connect(&timer, SIGNAL(timeout()), this, SLOT(handleTimeout()));
+		connect(server, &QWebSocketServer::newConnection, this, &ArduinoReader::onNewConnection);
 
 		if (serial->open(QIODevice::ReadOnly)) {
-			qDebug() << "Port serie ouvert avec succes.";
-			timer.start(100); // Ajustez selon les besoins
+			qDebug() << "Port série ouvert avec succès.";
+
+			if (server->listen(QHostAddress::Any, 12345)) { // Choisissez le port que vous préférez
+				qDebug() << "Serveur WebSocket démarré sur le port" << server->serverPort();
+			}
+			else {
+				qDebug() << "Échec du démarrage du serveur WebSocket.";
+			}
 		}
 		else {
-			qDebug() << "Impossible d'ouvrir port serie.";
+			qDebug() << "Échec de l'ouverture du port série.";
 		}
+
+		// Timer pour envoyer les données au client toutes les 100 millisecondes
+		connect(&sendTimer, &QTimer::timeout, this, &ArduinoReader::sendToClients);
+		sendTimer.start(100);
 	}
 
 public slots:
 	void readData()
 	{
-		buffer.append(serial->readAll());
+		QByteArray data = serial->readAll();
+		// Assurez-vous que les données lues sont valides avant de les traiter
+		if (!data.isEmpty()) {
+			buffer.append(data);
+
+			while (buffer.contains("\r\n")) {
+				int endIndex = buffer.indexOf("\r\n") + 2; // Ajoutez 2 pour inclure les caractères de fin de ligne
+				QByteArray uidData = buffer.left(endIndex);
+				buffer = buffer.mid(endIndex);
+
+				QString uid = QString(uidData).remove(QRegExp("[^A-Fa-f0-9]"));
+
+				if (!uid.isEmpty()) {
+					qDebug() << "UID du badge RFID : " << uid;
+
+					// Envoyer l'UID aux clients WebSocket connectés
+					foreach(QWebSocket *client, clients) {
+						client->sendTextMessage(uid);
+					}
+				}
+			}
+		}
 	}
 
-	void handleTimeout()
+
+	void sendToClients()
 	{
-		if (!buffer.isEmpty()) {
-			QString uid = QString(buffer).remove(QRegExp("[^A-Fa-f0-9]"));
-			if (!uid.isEmpty()) {
-				qDebug() << "UID du badge RFID : " << uid;
+		while (buffer.size() >= 3) {  // Taille minimale d'un UID dans cet exemple
+			QByteArray uidData = buffer.left(3);
+			buffer = buffer.mid(3);
+
+			QString uid = QString(uidData).remove(QRegExp("[^A-Fa-f0-9]"));
+			qDebug() << "UID du badge RFID : " << uid;
+
+			// Envoyer l'UID aux clients WebSocket connectés
+			foreach(QWebSocket *client, clients) {
+				client->sendTextMessage(uid);
 			}
-			buffer.clear();
+		}
+	}
+
+	void onNewConnection()
+	{
+		QWebSocket *clientSocket = server->nextPendingConnection();
+		connect(clientSocket, &QWebSocket::disconnected, this, &ArduinoReader::onSocketDisconnected);
+		clients << clientSocket;
+		qDebug() << "Nouvelle connexion WebSocket.";
+	}
+
+	void onSocketDisconnected()
+	{
+		QWebSocket *clientSocket = qobject_cast<QWebSocket *>(sender());
+		if (clientSocket) {
+			clients.removeOne(clientSocket);
+			clientSocket->deleteLater();
+			qDebug() << "Connexion WebSocket fermée.";
 		}
 	}
 
 private:
 	QSerialPort *serial;
-	QTimer timer;
+	QWebSocketServer *server;
+	QList<QWebSocket *> clients;
+	QTimer sendTimer;
 	QByteArray buffer;
 };
 
