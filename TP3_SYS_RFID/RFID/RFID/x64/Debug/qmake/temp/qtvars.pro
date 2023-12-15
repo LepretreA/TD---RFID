@@ -1,2 +1,2 @@
 CONFIG += no_fixpath
-QT += core serialport websockets
+QT += core serialport websockets sql
