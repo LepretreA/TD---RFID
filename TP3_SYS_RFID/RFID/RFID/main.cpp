@@ -22,19 +22,23 @@ public:
 		connect(serial, SIGNAL(readyRead()), this, SLOT(readData()));
 		connect(server, &QWebSocketServer::newConnection, this, &ArduinoReader::onNewConnection);
 
+		qDebug() << "\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
+
 		if (serial->open(QIODevice::ReadOnly)) {
-			qDebug() << "Port série ouvert avec succès.";
+			qDebug() << "SERIAL_PORT_OPENED_ON_COM3.";
 
 			if (server->listen(QHostAddress::Any, 12345)) { // Choisissez le port que vous préférez
-				qDebug() << "Serveur WebSocket démarré sur le port" << server->serverPort();
+				qDebug() << "WEBSOCKET_SERVER_OPENED_ON" << server->serverPort() <<".";
 			}
 			else {
-				qDebug() << "Échec du démarrage du serveur WebSocket.";
+				qDebug() << "FAILED_TO_OPEN_WEBSOCKET_SERVER.";
 			}
 		}
 		else {
-			qDebug() << "Échec de l'ouverture du port série.";
+			qDebug() << "FAILED_TO_OPEN_SERIAL_PORT.";
 		}
+
+		qDebug() << "\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
 
 		// Timer pour envoyer les données au client toutes les 100 millisecondes
 		connect(&sendTimer, &QTimer::timeout, this, &ArduinoReader::sendToClients);
@@ -57,7 +61,7 @@ public slots:
 				QString uid = QString(uidData).remove(QRegExp("[^A-Fa-f0-9]"));
 
 				if (!uid.isEmpty()) {
-					qDebug() << "UID du badge RFID : " << uid;
+					qDebug() << uid;
 
 					// Envoyer l'UID aux clients WebSocket connectés
 					foreach(QWebSocket *client, clients) {
@@ -76,7 +80,7 @@ public slots:
 			buffer = buffer.mid(3);
 
 			QString uid = QString(uidData).remove(QRegExp("[^A-Fa-f0-9]"));
-			qDebug() << "UID du badge RFID : " << uid;
+			qDebug() << uid;
 
 			// Envoyer l'UID aux clients WebSocket connectés
 			foreach(QWebSocket *client, clients) {
