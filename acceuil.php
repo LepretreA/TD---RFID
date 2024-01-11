@@ -180,7 +180,14 @@ $_SESSION['user_id'] = $row['id']; ?>
   </section>
   <section class="grid">
     
-    <div><article><?php include 'map.php'; ?></article></div>
+    <!-- <div><article><?php //include 'map.php'; ?></article></div> -->
+    <div><iframe
+  id="inlineFrameExample"
+  title="Inline Frame Example"
+  width="500"
+  height="300"
+  src="http://192.168.65.237/TP3-HUGO/TP3/new/card3.php">
+</iframe></div>
 
   </section>
   
