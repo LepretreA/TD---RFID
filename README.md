@@ -1,6 +1,6 @@
 # TP RFID
 
-Le TP RFIDt est une collaboration entre **Edouard**, **Hugo** et **Alexandre** pour la troisième rotation, ayant pour but d'offrir une expérience utilisateur optimale dans le domaine de la lecture de badges RFID.
+Le TP RFID est une collaboration entre **Edouard**, **Hugo** et **Alexandre** pour la troisième rotation, ayant pour but d'offrir une expérience utilisateur optimale dans le domaine de la lecture de badges RFID.
 
 ## 🌐 Adresses IP des Machines Virtuelles 
 
