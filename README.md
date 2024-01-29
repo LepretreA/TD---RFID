@@ -13,12 +13,6 @@ Les machines virtuelles dédiées au projet sont accessibles via les adresses IP
 - **Site Web** : `192.168.65.237`
 - **Base de Données** : `192.168.64.200`
 
-## 🗃 Base de Données : Lawrence 
-
-Pour accéder à cette base de données, voici les identifiants:
-- **Identifiant** : `root`
-- **Mot de passe** : `root`
-
 ### Structure de la base de données
 
 ## 🗃 Base de Données : RFID 
