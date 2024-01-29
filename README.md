@@ -1,4 +1,6 @@
-Pour le serveur il faut télécharger et ouvrir `TP3_SYS_RFID/RFID` avec VSC 2017
+**Pour le serveur il faut télécharger et ouvrir `TP3_SYS_RFID/RFID` avec VSC 2017**
+**Il faut brancher le lecteur RFID avant de lancer le serveur (ne pas oublier de configurer le port COM et les adresses IP)**
+**Pour la VM d'affichage (IP a changer pour recevoir le WS)**
 
 
 # TP RFID
