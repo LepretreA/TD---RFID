@@ -1,3 +1,6 @@
+Pour le serveur il faut télécharger et ouvrir `TP3_SYS_RFID/RFID` avec VSC 2017
+
+
 # TP RFID
 
 Le TP RFID est une collaboration entre **Edouard**, **Hugo** et **Alexandre** pour la troisième rotation, ayant pour but d'offrir une expérience utilisateur optimale dans le domaine de la lecture de badges RFID.
